@@ -1,0 +1,46 @@
+% M-file: term_char_general.m
+% Plots terminal characteristics (Vt vs Ia) for any given power factor
+% Use this for any given power factor nigga
+
+clc;
+clear;
+
+% === User Inputs ===
+pf = 0.2;            % Power Factor (between 0 and 1)
+is_lagging = true;   % true for lagging, false for leading
+
+% === Constants ===
+i_a = (0:1:20) * 3;     % Armature current (0 to 60 A)
+e_a = 277.0;            % Internal generated phase voltage (no-load)
+x_s = 1.0;              % Synchronous reactance
+
+% === Calculate Power Factor Angle in Radians ===
+theta_deg = acosd(pf);
+if is_lagging
+    theta = deg2rad(theta_deg);   % lagging: +theta
+    label_type = '0.8 PF Lagging';
+else
+    theta = -deg2rad(theta_deg);  % leading: -theta
+    label_type = '0.8 PF Leading';
+end
+
+% === Initialize Phase Voltage Vector ===
+v_phase = zeros(1, length(i_a));
+
+% === Calculate Phase Voltages for Each Current ===
+for ii = 1:length(i_a)
+    v_phase(ii) = sqrt(e_a^2 - (x_s * i_a(ii) * cos(theta))^2) ...
+                  - (x_s * i_a(ii) * sin(theta));
+end
+
+% === Convert Phase Voltage to Line Voltage ===
+v_t = v_phase * sqrt(3);
+
+% === Plot the Terminal Characteristic ===
+figure;
+plot(i_a, v_t, 'k', 'LineWidth', 2.0);
+xlabel('Line Current (A)', 'FontWeight', 'Bold');
+ylabel('Terminal Voltage (V)', 'FontWeight', 'Bold');
+title(['Terminal Characteristic for ', label_type], 'FontWeight', 'Bold');
+grid on;
+axis([0 60 400 550]);
